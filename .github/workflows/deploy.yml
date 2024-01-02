@@ -1,0 +1,33 @@
+name: 'Build App'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Ping Server
+        uses: tyrrrz/action-http-request@master
+        with:
+          url: https://api.phazed.xyz/api/update?key=${{ secret.MASTER_KEY }}
