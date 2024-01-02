@@ -4,12 +4,13 @@ import mongoose from "mongoose";
 import crypto from "node:crypto";
 import * as nodemailer from 'nodemailer';
 
-import { AuthRequestBody, AuthRequestBodyType } from "./types/AuthRequestBody";
-
-import users from "./db/users";
+import { SignupRequestBody, SignupRequestBodyType } from "./types/SignupRequestBody";
+import { LoginRequestBody, LoginRequestBodyType } from "./types/LoginRequestBody";
 import { ResponseError } from "./types/ResponseError";
 import { SignupResponse } from "./types/SignupResponse";
 import { LoginResponse } from "./types/LoginResponse";
+
+import users from "./db/users";
 import * as aviUtils from "./aviUtils";
 
 let main = ( fastify: FastifyInstance ) => {
@@ -27,11 +28,11 @@ let main = ( fastify: FastifyInstance ) => {
     tls: { rejectUnauthorized: false },
   })
 
-  fastify.post<{ Body: AuthRequestBodyType }>(
+  fastify.post<{ Body: SignupRequestBodyType }>(
     '/api/id/v1/auth/signup',
     {
       schema: {
-        body: AuthRequestBody,
+        body: SignupRequestBody,
         response: {
           400: ResponseError,
           409: ResponseError,
@@ -42,7 +43,7 @@ let main = ( fastify: FastifyInstance ) => {
     },
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
-      if(!req.headers['CF-Connecting-IP'])return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
 
       if(req.headers["content-type"] !== 'application/json')return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
       if(!req.body || !req.body.username || !req.body.password || !req.body.email)return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
@@ -108,11 +109,11 @@ let main = ( fastify: FastifyInstance ) => {
     }
   )
 
-  fastify.post<{ Body: AuthRequestBodyType }>(
+  fastify.post<{ Body: LoginRequestBodyType }>(
     '/api/id/v1/auth/login',
     {
       schema: {
-        body: AuthRequestBody,
+        body: LoginRequestBody,
         response: {
           400: ResponseError,
           403: ResponseError,
