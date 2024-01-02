@@ -5,13 +5,16 @@ import crypto from "node:crypto";
 import * as nodemailer from 'nodemailer';
 
 import { SignupRequestBody, SignupRequestBodyType } from "./types/SignupRequestBody";
+import { VerifyRequestBody, VerifyRequestBodyType } from "./types/VerifyRequestBody";
 import { LoginRequestBody, LoginRequestBodyType } from "./types/LoginRequestBody";
 import { ResponseError } from "./types/ResponseError";
 import { SignupResponse } from "./types/SignupResponse";
 import { LoginResponse } from "./types/LoginResponse";
 
-import users from "./db/users";
 import * as aviUtils from "./aviUtils";
+import users from "./db/users";
+import sessions from "./db/sessions";
+import { VerifyResponse } from "./types/VerifyResponse";
 
 let main = ( fastify: FastifyInstance ) => {
   mongoose.connect(process.env.MONGO_URI!)
@@ -28,6 +31,7 @@ let main = ( fastify: FastifyInstance ) => {
     tls: { rejectUnauthorized: false },
   })
 
+  // Auth
   fastify.post<{ Body: SignupRequestBodyType }>(
     '/api/id/v1/auth/signup',
     {
@@ -57,8 +61,19 @@ let main = ( fastify: FastifyInstance ) => {
       let ipReq = await fetch(`https://ipinfo.io/${req.headers['cf-connecting-ip']}?token=96a00067d1963b`);
       let ipInfo = await ipReq.json();
 
-      let userData = {
+      let userID = crypto.randomUUID()
+
+      let session = await sessions.create({
         _id: crypto.randomUUID(),
+        token: crypto.randomBytes(32).toString('hex'),
+        createdOn: new Date(),
+        expiresOn: new Date(Date.now() + 259200000),
+        loc: ipInfo,
+        userID
+      })
+
+      let userData = {
+        _id: userID,
 
         username: req.body.username,
         password: await argon2.hash(req.body.password, { hashLength: 50, type: argon2.argon2id }),
@@ -75,14 +90,7 @@ let main = ( fastify: FastifyInstance ) => {
         roles: [],
         allowedApps: [],
 
-        sessions: [
-          {
-            token: crypto.randomBytes(32).toString('hex'),
-            createdOn: new Date(),
-            expiresOn: new Date(Date.now() + 259200000),
-            loc: ipInfo
-          }
-        ]
+        sessions: [ session._id ]
       }
 
       let mail = () => {
@@ -108,7 +116,7 @@ let main = ( fastify: FastifyInstance ) => {
       aviUtils.generateAvi(userData.username, userData._id + '/' + userData.avatar);
       await users.create(userData);
 
-      reply.send({ ok: true, session: userData.sessions[0].token })
+      reply.send({ ok: true, session: session.token })
     }
   )
 
@@ -139,6 +147,51 @@ let main = ( fastify: FastifyInstance ) => {
         reply.send({ ok: true, session: 'no', requiresMfa: user.hasMfa })
       else
         reply.code(403).send({ ok: false, error: 'Incorrect Username or Password' });
+    }
+  )
+
+  // Email
+  fastify.post<{ Body: VerifyRequestBodyType, Querystring: { token: String } }>(
+    '/api/id/v1/email/verify',
+    {
+      schema: {
+        body: VerifyRequestBody,
+        response: {
+          400: ResponseError,
+          401: ResponseError,
+          403: ResponseError,
+          200: VerifyResponse
+        }
+      }
+    },
+    async ( req, reply ) => {
+      reply.header('Content-Type', 'application/json');
+
+      if(req.headers["content-type"] !== 'application/json')return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      if(!req.body || !req.body.code)return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+
+      if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
+
+      let session = await sessions.findOne({ token: req.query.token });
+      if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
+
+      // if(!session.expiresOn || session.expiresOn.getTime() > Date.now())
+      //   return reply.code(401).send({ ok: false, error: 'Invalid Session' });
+      
+      let user = await users.findById(session.userID);
+      if(!user){
+        sessions.deleteOne({ _id: session._id })
+        return reply.code(401).send({ ok: false, error: 'Invalid Session' });
+      }
+
+      if(user.emailVerificationCode !== req.body.code)
+        return reply.code(403).send({ ok: false, error: 'Invalid Code' });
+
+      user.emailVerified = true;
+      user.emailVerificationCode = '';
+      await user.save();
+
+      reply.send({ ok: true });
     }
   )
 }
