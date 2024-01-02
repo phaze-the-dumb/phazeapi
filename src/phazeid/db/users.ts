@@ -6,6 +6,10 @@ let schema = new mongoose.Schema({
   username: String,
   password: String,
 
+  email: String,
+  emailVerificationCode: String,
+  emailVerified: Boolean,
+
   avatar: String,
 
   hasMfa: Boolean,

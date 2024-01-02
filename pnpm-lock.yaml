@@ -29,8 +29,14 @@ dependencies:
   mongoose:
     specifier: ^8.0.3
     version: 8.0.3
+  nodemailer:
+    specifier: ^6.9.8
+    version: 6.9.8
 
 devDependencies:
+  '@types/nodemailer':
+    specifier: ^6.4.14
+    version: 6.4.14
   nodemon:
     specifier: ^3.0.2
     version: 3.0.2
@@ -1188,6 +1194,12 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
+  /@types/nodemailer@6.4.14:
+    resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
+    dependencies:
+      '@types/node': 20.10.6
+    dev: true
+
   /@types/webidl-conversions@7.0.3:
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
     dev: false
@@ -1860,6 +1872,11 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: false
+
+  /nodemailer@6.9.8:
+    resolution: {integrity: sha512-cfrYUk16e67Ks051i4CntM9kshRYei1/o/Gi8K1d+R34OIs21xdFnW7Pt7EucmVKA0LKtqUGNcjMZ7ehjl49mQ==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /nodemon@3.0.2:
