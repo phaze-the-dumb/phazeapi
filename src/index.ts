@@ -16,10 +16,10 @@ fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
   if(req.query.key === process.env.MASTER_KEY)
     return reply.code(403).send({ ok: false });
 
-  reply.send({ ok: true });
-
   spawnSync('git pull origin');
   spawnSync('npm run build');
+
+  reply.send({ ok: true });
   spawnSync('service api restart');
 })
 
