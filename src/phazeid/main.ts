@@ -51,6 +51,9 @@ let main = ( fastify: FastifyInstance ) => {
       let user = await users.findOne({ username: req.body.username });
       if(user)return reply.code(409).send({ ok: false, error: 'User Already Exists' });
 
+      user = await users.findOne({ email: req.body.email });
+      if(user)return reply.code(409).send({ ok: false, error: 'User Already Exists' });
+
       let ipReq = await fetch(`https://ipinfo.io/${req.headers['cf-connecting-ip']}?token=96a00067d1963b`);
       let ipInfo = await ipReq.json();
 
