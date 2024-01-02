@@ -136,7 +136,7 @@ let main = ( fastify: FastifyInstance ) => {
       let isValid = await argon2.verify(user.password!, req.body.password.toString(), { type: argon2.argon2id });
 
       if(isValid)
-        reply.send({ ok: true, session: 'help', requiresMfa: user.hasMfa })
+        reply.send({ ok: true, session: 'no', requiresMfa: user.hasMfa })
       else
         reply.code(403).send({ ok: false, error: 'Incorrect Username or Password' });
     }
