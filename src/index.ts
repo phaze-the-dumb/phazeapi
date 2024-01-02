@@ -1,10 +1,8 @@
 import Fastify from "fastify";
-import dotenv from "dotenv";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import 'dotenv/config';
 
 import phazeid from './phazeid/main';
-
-dotenv.config();
 
 let fastify = Fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
 
