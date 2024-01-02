@@ -18,22 +18,7 @@ let schema = new mongoose.Schema({
   roles: [ String ],
   allowedApps: [ String ],
 
-  sessions: [{
-    token: String,
-    createdOn: Date,
-    expiresOn: Date,
-    loc: {
-      ip: String,
-      hostname: String,
-      city: String,
-      region: String,
-      country: String,
-      loc: String,
-      org: String,
-      postal: String,
-      timezone: String
-    }
-  }]
+  sessions: [ String ]
 })
 
 export default mongoose.model('User', schema);
