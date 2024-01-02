@@ -13,7 +13,7 @@ fastify.get('/api/status', ( req, reply ) => {
 })
 
 fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
-  if(req.query.key === process.env.MASTER_KEY)
+  if(req.query.key !== process.env.MASTER_KEY)
     return reply.code(403).send({ ok: false });
 
   console.log('Pulling github repo.');
