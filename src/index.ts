@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import { spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 import 'dotenv/config';
 
 import phazeid from './phazeid/main';
@@ -16,11 +16,16 @@ fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
   if(req.query.key === process.env.MASTER_KEY)
     return reply.code(403).send({ ok: false });
 
-  spawnSync('git pull origin');
-  spawnSync('npm run build');
+  spawn('git', [ 'pull', 'origin' ]).on('close', () => {
+    console.log('Pulled github repo, building...');
 
-  reply.send({ ok: true });
-  spawnSync('service api restart');
+    spawn('npm', [ 'run', 'build' ]).on('close', () => {
+      console.log('Built code. Restarting...');
+
+      reply.send({ ok: true });
+      spawn('service api restart');
+    })
+  })
 })
 
 phazeid(fastify);
