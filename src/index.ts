@@ -21,10 +21,10 @@ fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
   spawn('git', [ 'pull', 'origin' ]).on('close', () => {
     console.log('Pulled github repo. Installing deps...');
 
-    spawn('npm', [ 'install' ]).on('close', () => {
+    spawn('pnpm', [ 'install' ]).on('close', () => {
       console.log('Installed deps. Building...');
 
-      spawn('npm', [ 'run', 'build' ]).on('close', () => {
+      spawn('pnpm', [ 'build' ]).on('close', () => {
         console.log('Built code. Restarting...');
 
         reply.send({ ok: true });
