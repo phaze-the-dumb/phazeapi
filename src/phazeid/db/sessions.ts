@@ -9,6 +9,9 @@ let schema = new mongoose.Schema({
 
   userID: String,
 
+  valid: Boolean,
+  challengeCode: String,
+
   loc: {
     ip: String,
     hostname: String,
