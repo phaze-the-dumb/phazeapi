@@ -27,8 +27,9 @@ fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
       spawn('pnpm', [ 'build' ]).on('close', () => {
         console.log('Built code. Restarting...');
 
-        reply.send({ ok: true });
-        spawn('service', [ 'api', 'restart' ]);
+        reply.send({ ok: true }).then(() => {
+          spawn('service', [ 'api', 'restart' ]);
+        }, () => {});
       })
     })
   })
