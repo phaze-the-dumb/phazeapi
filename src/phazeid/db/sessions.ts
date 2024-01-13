@@ -8,6 +8,7 @@ let schema = new mongoose.Schema({
   expiresOn: Date,
 
   userID: String,
+  hasMfa: Boolean,
 
   valid: Boolean,
   challengeCode: String,

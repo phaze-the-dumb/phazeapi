@@ -3,38 +3,72 @@ import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { spawn } from 'child_process';
 import 'dotenv/config';
 
+import swagger from '@fastify/swagger';
+import swaggerui from '@fastify/swagger-ui';
+
 import phazeid from './phazeid/main';
 
-let fastify = Fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
+let main = async () => {
+  let fastify = Fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
 
-fastify.get('/api/status', ( req, reply ) => {
-  reply.header('Access-Control-Allow-Origin', '*');
-  reply.send({ ok: true });
-})
+  await fastify.register(swagger, {
+    swagger: {
+      info: {
+        title: 'Phaze API',
+        description: '',
+        version: '0.1.0'
+      },
+      host: 'api.phazed.xyz',
+      schemes: [ 'https' ],
+      consumes: [ 'application/json' ],
+      produces: [ 'application/json' ],
+      tags: [
+        { name: 'PhazeID (Auth)', description: 'Endpoints used to authenticate users.' },
+        { name: 'PhazeID (Email)', description: 'Endpoints relating to emails.' },
+        { name: 'PhazeID (Profile)', description: 'Endpoints used for users profiles.' },
+        { name: 'Internal', description: 'Internal endpoints, Locked Down.' },
+      ],
+    }
+  })
 
-fastify.get<{ Querystring: { key: String } }>('/api/update', ( req, reply ) => {
-  if(req.query.key !== process.env.MASTER_KEY)
-    return reply.code(403).send({ ok: false });
+  await fastify.register(swaggerui, {
+    routePrefix: '/docs'
+  })
 
-  console.log('Pulling github repo.');
+  fastify.get('/api/status', { schema: { tags: [ 'Internal' ] } }, ( req, reply ) => {
+    reply.header('Access-Control-Allow-Origin', '*');
+    reply.send({ ok: true });
+  })
 
-  spawn('git', [ 'pull', 'origin' ]).on('close', () => {
-    console.log('Pulled github repo. Installing deps...');
+  fastify.get<{ Querystring: { key: String } }>('/api/update', { schema: { tags: [ 'Internal' ] } }, ( req, reply ) => {
+    if(req.query.key !== process.env.MASTER_KEY)
+      return reply.code(403).send({ ok: false });
 
-    spawn('pnpm', [ 'install' ]).on('close', () => {
-      console.log('Installed deps. Building...');
+    console.log('Pulling github repo.');
 
-      spawn('pnpm', [ 'build' ]).on('close', () => {
-        console.log('Built code. Restarting...');
+    spawn('git', [ 'pull', 'origin' ]).on('close', () => {
+      console.log('Pulled github repo. Installing deps...');
 
-        reply.send({ ok: true }).then(() => {
-          spawn('service', [ 'api', 'restart' ]);
-        }, () => {});
+      spawn('pnpm', [ 'install' ]).on('close', () => {
+        console.log('Installed deps. Building...');
+
+        spawn('pnpm', [ 'build' ]).on('close', () => {
+          console.log('Built code. Restarting...');
+
+          reply.send({ ok: true }).then(() => {
+            spawn('service', [ 'api', 'restart' ]);
+          }, () => {});
+        })
       })
     })
   })
-})
 
-phazeid(fastify);
+  await phazeid(fastify);
 
-fastify.listen({ port: 8080, host: '0.0.0.0' });
+  fastify.listen({ port: 8080, host: '0.0.0.0' });
+
+  await fastify.ready();
+  fastify.swagger();
+}
+
+main();
