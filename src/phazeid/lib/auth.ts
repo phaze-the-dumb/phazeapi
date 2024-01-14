@@ -93,7 +93,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
             from: 'Phaze ID <no-reply@phazed.xyz>',
             to: userData.email,
             subject: 'Verification Email',
-            html: `Your verication code is ${ userData.emailVerificationCode }<br />Do <b>NOT</b> share this code with anyone.`
+            html: `Your verification code is ${ userData.emailVerificationCode }<br />Do <b>NOT</b> share this code with anyone.`
           }, ( err, info ) => {
             res({ err, info });
           })
@@ -795,7 +795,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.send({ ok: true });
     }
 
-    if(user.lastPasswordChange!.getTime() < Date.now() - 60000){
+    if(user.lastPasswordChange!.getTime() > Date.now() - 60000){
       transport.sendMail({
         from: 'Phaze ID <no-reply@phazed.xyz>',
         to: user!.email!,

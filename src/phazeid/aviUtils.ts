@@ -35,9 +35,8 @@ export let generateAvi = ( username: string, id: string ) => {
   console.log(`Uploading avatar for ${username} (${id})`);
 }
 
-export let upload = ( body: string, id: string ) => {
+export let upload = ( binaryData: Buffer, id: string ) => {
   return new Promise<void>(async ( res, rej ) => {
-    let binaryData = Buffer.from(body.split(',')[1], 'base64');
     console.log(`Uploading avatar for ${id}`);
 
     let canvas = createCanvas(300, 300);

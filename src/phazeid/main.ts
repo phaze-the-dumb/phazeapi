@@ -28,7 +28,7 @@ let main = async ( fastify: FastifyInstance ) => {
   await email.main(fastify);
 
   // Profile
-  await profile.main(fastify);
+  await profile.main(fastify, transport);
 }
 
 export default main;

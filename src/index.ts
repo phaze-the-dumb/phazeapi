@@ -5,6 +5,7 @@ import 'dotenv/config';
 
 import swagger from '@fastify/swagger';
 import swaggerui from '@fastify/swagger-ui';
+import multipart from '@fastify/multipart';
 
 import phazeid from './phazeid/main';
 
@@ -30,6 +31,18 @@ let main = async () => {
       ],
     }
   })
+  
+  await fastify.register(multipart, {
+    limits: {
+      fieldNameSize: 100,
+      fieldSize: 100,
+      fields: 10,
+      fileSize: 1_000_000,
+      files: 1,
+      headerPairs: 2_000,
+      parts: 1_000 
+    }
+  });
 
   await fastify.register(swaggerui, {
     routePrefix: '/docs'

@@ -12,8 +12,10 @@ let schema = new mongoose.Schema({
   email: String,
   emailVerificationCode: String,
   emailVerified: Boolean,
+  lastEmailChange: Date,
 
   avatar: String,
+  lastAvatarChange: Date,
 
   hasMfa: Boolean,
   mfaString: String,
