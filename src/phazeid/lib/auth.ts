@@ -62,7 +62,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       let userID = crypto.randomUUID();
 
-      let session = await sessions.create({
+      let session = {
         _id: crypto.randomUUID(),
         token: crypto.randomBytes(32).toString('hex'),
         createdOn: new Date(),
@@ -71,7 +71,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         valid: true,
         challengeCode: '',
         userID
-      })
+      }
 
       let userData = {
         _id: userID,
@@ -122,6 +122,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       aviUtils.generateAvi(userData.username, userData._id + '/' + userData.avatar);
       await users.create(userData);
+      await sessions.create(session);
 
       reply.send({ ok: true, session: session.token })
     }
