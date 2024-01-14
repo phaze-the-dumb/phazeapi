@@ -37,7 +37,7 @@ let main = async () => {
       fieldNameSize: 100,
       fieldSize: 100,
       fields: 10,
-      fileSize: 1_000_000,
+      fileSize: 10_000_000,
       files: 1,
       headerPairs: 2_000,
       parts: 1_000 
