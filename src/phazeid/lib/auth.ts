@@ -35,6 +35,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
 
@@ -131,6 +132,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
 
@@ -257,6 +259,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "GET");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
       if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
@@ -313,6 +316,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "DELETE");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
       if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
@@ -377,6 +381,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
 
@@ -450,6 +455,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
 
@@ -521,6 +527,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "GET");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
       if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
@@ -601,6 +608,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
       reply.header('Content-Type', 'application/json');
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
       if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
@@ -672,6 +680,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "GET");
 
     if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
     if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
@@ -735,6 +744,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     async ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "PUT");
 
     if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
     if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
