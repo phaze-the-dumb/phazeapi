@@ -50,6 +50,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       return;
     }
+      
+    if(!user.emailVerified)
+      return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
     if(user.hasMfa && !session.hasMfa)
       return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
