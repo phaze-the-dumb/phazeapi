@@ -294,6 +294,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
 
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
+
       if(user.hasMfa && !session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
 
@@ -350,6 +353,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         await sessions.deleteOne({ _id: session._id });
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
+
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
       if(user.hasMfa && !session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
@@ -419,6 +425,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         await sessions.deleteOne({ _id: session._id });
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
+      
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
       if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
         user.sessions = user.sessions.filter(x => x !== session!._id);
@@ -493,6 +502,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         await sessions.deleteOne({ _id: session._id });
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
+      
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
       if(!user.hasMfa || session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'User does not have MFA enabled, or session is already verified' });
@@ -563,6 +575,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
         return;
       }
+      
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
       if(user.hasMfa && !session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
@@ -644,6 +659,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
         return;
       }
+      
+      if(!user.emailVerified)
+        return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
       if(user.hasMfa && !session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
@@ -716,6 +734,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       return;
     }
+      
+    if(!user.emailVerified)
+      return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
     if(user.hasMfa && !session.hasMfa)
       return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
@@ -780,6 +801,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       return;
     }
+      
+    if(!user.emailVerified)
+      return reply.code(403).send({ ok: false, error: 'Verify Email' });
 
     if(user.hasMfa && !session.hasMfa)
       return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });

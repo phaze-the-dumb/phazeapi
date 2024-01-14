@@ -58,9 +58,6 @@ export let main = async ( fastify: FastifyInstance ) => {
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
 
-      if(!session.valid)
-        return reply.code(403).send({ ok: false, error: 'Session requires verification' });
-
       if(user.emailVerified)
         return reply.code(409).send({ ok: false, error: 'Email already verified' });
 
