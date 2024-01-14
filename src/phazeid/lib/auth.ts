@@ -16,6 +16,14 @@ import users from "../db/users";
 import sessions from "../db/sessions";
 
 export let main = async ( fastify: FastifyInstance, transport: Transporter ) => {
+  fastify.options('/id/v1/auth/signup', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "POST");
+    
+    reply.send('200 OK');
+  })
+
   fastify.post<{ Body: SignupRequestBodyType }>(
     '/id/v1/auth/signup',
     {
