@@ -20,6 +20,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
     
     reply.send('200 OK');
   })
