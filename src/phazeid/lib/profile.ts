@@ -257,6 +257,15 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.send({ ok: true });
   })
 
+  fastify.options('/id/v1/email/avatar', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "PUT");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
+  })
+
   fastify.put<{ Querystring: { token: string }, Body: { img: string } }>(
     '/id/v1/profile/avatar', 
     {
