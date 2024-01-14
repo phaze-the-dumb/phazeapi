@@ -88,6 +88,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
         avatar: crypto.randomUUID(),
 
+        lastEmailChange: new Date(),
+        lastAvatarChange: new Date(0),
+
         hasMfa: false,
         mfaString: null,
 
