@@ -75,6 +75,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         ok: true,
         id: user._id,
         username: user.username,
+        email: user.email,
         hasMfa: user.hasMfa,
         avatar: user.avatar
       })
