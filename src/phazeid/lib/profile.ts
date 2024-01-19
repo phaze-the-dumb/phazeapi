@@ -23,6 +23,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
             ok: { type: 'boolean' },
             id: { type: 'string' },
             username: { type: 'string' },
+            email: { type: 'string' },
             hasMfa: { type: 'boolean' },
             avatar: { type: 'string' }
           }
