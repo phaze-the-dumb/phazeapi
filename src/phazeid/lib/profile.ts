@@ -94,6 +94,15 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   })
 
+  fastify.options('/id/v1/profile/username', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "PUT");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
+  })
+
   fastify.put<{ Querystring: { token: string }, Body: { username: string } }>(
     '/id/v1/profile/username', 
     {
@@ -162,6 +171,15 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     await user.save();
 
     reply.send({ ok: true });
+  })
+
+  fastify.options('/id/v1/profile/avatar', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "PUT");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
   })
 
   fastify.put<{ Querystring: { token: string }, Body: { email: string } }>(
