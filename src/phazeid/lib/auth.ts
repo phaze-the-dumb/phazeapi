@@ -320,6 +320,15 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
+  fastify.options('/id/v1/auth/sessions', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "DELETE,GET");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
+  })
+
   fastify.delete<{ Querystring: { sessionId: string, token: String } }>(
     '/id/v1/auth/sessions',
     {
