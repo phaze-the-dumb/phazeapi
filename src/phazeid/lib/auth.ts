@@ -296,6 +296,61 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
+  fastify.options('/id/v1/auth/resetpassword/reset', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
+  })
+  
+  fastify.post<{ Body: { token: string, password: string } }>(
+    '/id/v1/auth/resetpassword/reset',
+    {
+      schema: {
+        summary: 'Fully reset an accounts password',
+        tags: [ 'PhazeID (Auth)' ],
+        body: { token: { type: 'string' }, password: { type: 'string' } },
+        response: {
+          400: ResponseError,
+          401: ResponseError,
+          500: ResponseError,
+          200: { ok: { type: 'boolean' } }
+        }
+      }
+    },
+    async ( req, reply ) => {
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
+
+      if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
+
+      if(req.headers["content-type"] !== 'application/json')return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      if(!req.body || !req.body.token || !req.body.password)return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      
+      let user = await users.findOne({ passwordChangeToken: req.body.token });
+      if(!user)
+        return reply.code(401).send({ ok: false, error: 'Email not found' });
+
+      user.password = await argon2.hash(req.body.password, { hashLength: 50, type: argon2.argon2id });
+      user.passwordChangeToken = null;
+      
+      await user.save();
+      reply.send({ ok: true });
+
+      transport.sendMail({
+        from: 'Phaze ID <no-reply@phazed.xyz>',
+        to: user!.email!,
+        subject: 'Password Reset Notification',
+        html: `Your account password has been reset, If you do not recognise this activity please contact _phaz on discord immediately. <br /><br />IP Address: ${req.headers['cf-connecting-ip']}<br />User-Agent: ${req.headers['user-agent']}<br /><br />Best regards, Phaze.`
+      }, ( err, info ) => {
+        console.error(err);
+      })
+    }
+  )
+
   fastify.get<{ Querystring: { token: String } }>(
     '/id/v1/auth/sessions',
     {
