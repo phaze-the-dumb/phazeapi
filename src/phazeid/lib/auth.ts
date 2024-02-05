@@ -251,7 +251,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
           400: ResponseError,
           401: ResponseError,
           500: ResponseError,
-          200: { ok: { type: 'boolean' }, error: { type: 'string' } }
+          200: { ok: { type: 'boolean' } }
         }
       }
     },
@@ -292,7 +292,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         return reply.code(500).send({ ok: false, error: 'Failed to verify email' });
       }
 
-      reply.send({ ok: false });
+      reply.send({ ok: true });
     }
   )
 
