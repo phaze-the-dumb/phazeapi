@@ -251,7 +251,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
           400: ResponseError,
           401: ResponseError,
           500: ResponseError,
-          200: { ok: { type: 'boolean' } }
+          200: { ok: { type: 'boolean' }, error: { type: 'string' } }
         }
       }
     },
@@ -267,7 +267,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       
       let user = await users.findOne({ email: req.body.email });
       if(!user)
-        return reply.code(401).send({ ok: false, error: 'Email' });
+        return reply.code(401).send({ ok: false, error: 'Email not found' });
 
       user.passwordChangeToken = crypto.randomBytes(64).toString('hex');
       await user.save();
