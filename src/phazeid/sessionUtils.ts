@@ -10,6 +10,7 @@ export let cleanSessionsForUser = async ( userID: string ): Promise<any[]> => {
 
   for(let i = 0; i < sessionsList.length; i++){ 
     let session = sessionsList[i];
+    if(!session.valid)continue;
 
     if(session.expiresOn && session.expiresOn.getTime() > Date.now()){
       newSessionList.push(session._id!);
