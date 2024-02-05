@@ -205,7 +205,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
           if(sent.err){
             console.error(sent.err);
 
-            await await sessions.deleteOne({ _id: session._id });
+            await sessions.deleteOne({ _id: session._id });
             return reply.send({ ok: false, error: 'Failed to verify email' });
           }
         }
@@ -228,6 +228,71 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         }
       } else
         reply.code(403).send({ ok: false, error: 'Incorrect Username or Password' });
+    }
+  )
+
+  fastify.options('/id/v1/auth/resetpassword', ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+    
+    reply.send('200 OK');
+  })
+  
+  fastify.post<{ Body: { email: String } }>(
+    '/id/v1/auth/resetpassword',
+    {
+      schema: {
+        summary: 'Send an email to reset the accounts password',
+        tags: [ 'PhazeID (Auth)' ],
+        body: { email: { type: 'string' } },
+        response: {
+          400: ResponseError,
+          401: ResponseError,
+          500: ResponseError,
+          200: { ok: { type: 'boolean' } }
+        }
+      }
+    },
+    async ( req, reply ) => {
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "POST");
+
+      if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
+
+      if(req.headers["content-type"] !== 'application/json')return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      if(!req.body || !req.body.email)return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      
+      let user = await users.findOne({ email: req.body.email });
+      if(!user)
+        return reply.code(401).send({ ok: false, error: 'Email' });
+
+      user.passwordChangeToken = crypto.randomBytes(64).toString('hex');
+      await user.save();
+
+      let mail = () => {
+        return new Promise<{ err: any, info: any }>(( res, rej ) => {
+          transport.sendMail({
+            from: 'Phaze ID <no-reply@phazed.xyz>',
+            to: user!.email!,
+            subject: 'Password Reset',
+            html: `<br /><br />IP Address: ${req.headers['cf-connecting-ip']}<br />User-Agent: ${req.headers['user-agent']}<br /><br />If you do not recognise this login attempt, please contact _phaz on discord immediately.<br />Best regards, Phaze.`
+          }, ( err, info ) => {
+            res({ err, info });
+          })
+        })
+      }
+
+      let sent = await mail();
+
+      if(sent.err){
+        console.error(sent.err);
+        return reply.code(500).send({ ok: false, error: 'Failed to verify email' });
+      }
+
+      reply.send({ ok: false });
     }
   )
 
@@ -308,7 +373,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         user.sessions = user.sessions.filter(x => x !== session!._id);
         await user.save();
 
-        await await sessions.deleteOne({ _id: session._id });
+        await sessions.deleteOne({ _id: session._id });
         return reply.code(401).send({ ok: false, error: 'Invalid Session' });
       }
 

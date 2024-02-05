@@ -9,6 +9,8 @@ let schema = new mongoose.Schema({
   lastUsernameChange: Date,
   lastPasswordChange: Date,
 
+  passwordChangeToken: String,  
+
   email: String,
   emailVerificationCode: String,
   emailVerified: Boolean,
