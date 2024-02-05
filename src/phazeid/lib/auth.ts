@@ -278,7 +278,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
             from: 'Phaze ID <no-reply@phazed.xyz>',
             to: user!.email!,
             subject: 'Password Reset',
-            html: `<br /><br />IP Address: ${req.headers['cf-connecting-ip']}<br />User-Agent: ${req.headers['user-agent']}<br /><br />If you do not recognise this login attempt, please contact _phaz on discord immediately.<br />Best regards, Phaze.`
+            html: `Here is your password reset link: https://id.phazed.xyz/?passreset=${user!.passwordChangeToken}<br /><br />IP Address: ${req.headers['cf-connecting-ip']}<br />User-Agent: ${req.headers['user-agent']}<br /><br />Best regards, Phaze.`
           }, ( err, info ) => {
             res({ err, info });
           })
