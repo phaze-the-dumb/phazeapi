@@ -3,6 +3,7 @@ import { Transporter } from "nodemailer";
 
 import { ResponseError } from "../types/ResponseError";
 import * as aviUtils from '../aviUtils';
+import { findUserFromToken } from "../sessionUtils";
 
 import users from "../db/users";
 import sessions from "../db/sessions";
@@ -35,41 +36,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "GET");
 
-    if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
-    if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
-
-    let session = await sessions.findOne({ token: req.query.token });
-    if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
-
-    if(req.headers['cf-connecting-ip'] !== session.loc!.ip)
-      return reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    
-    let user = await users.findById(session.userID);
-    if(!user){
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-      
-    if(!user.emailVerified)
-      return reply.code(403).send({ ok: false, error: 'Verify Email' });
-
-    if(user.hasMfa && !session.hasMfa)
-      return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-
-    if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
-      user.sessions = user.sessions.filter(x => x !== session!._id);
-      await user.save();
-
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-
-    if(!session.valid)
-      return reply.code(403).send({ ok: false, error: 'Session requires verification' });
+    let { user } = await findUserFromToken(req, reply);
 
     if(req.params.user === '@me'){
       reply.send({
@@ -124,41 +91,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");
 
-    if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
-    if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
-
-    let session = await sessions.findOne({ token: req.query.token });
-    if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
-
-    if(req.headers['cf-connecting-ip'] !== session.loc!.ip)
-      return reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    
-    let user = await users.findById(session.userID);
-    if(!user){
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-      
-    if(!user.emailVerified)
-      return reply.code(403).send({ ok: false, error: 'Verify Email' });
-
-    if(user.hasMfa && !session.hasMfa)
-      return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-
-    if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
-      user.sessions = user.sessions.filter(x => x !== session!._id);
-      await user.save();
-
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-
-    if(!session.valid)
-      return reply.code(403).send({ ok: false, error: 'Session requires verification' });
+    let { user } = await findUserFromToken(req, reply);
 
     if(user.lastUsernameChange!.getTime() > Date.now() - 600000)
       return reply.code(429).send({ ok: false, error: 'You can only change your username every 10 minutes' });
@@ -205,41 +138,8 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");
 
-    if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
-    if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
-
-    let session = await sessions.findOne({ token: req.query.token });
-    if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
-
-    if(req.headers['cf-connecting-ip'] !== session.loc!.ip)
-      return reply.code(401).send({ ok: false, error: 'Invalid Session' });
     
-    let user = await users.findById(session.userID);
-    if(!user){
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-      
-    if(!user.emailVerified)
-      return reply.code(403).send({ ok: false, error: 'Verify Email' });
-
-    if(user.hasMfa && !session.hasMfa)
-      return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-
-    if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
-      user.sessions = user.sessions.filter(x => x !== session!._id);
-      await user.save();
-
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-
-    if(!session.valid)
-      return reply.code(403).send({ ok: false, error: 'Session requires verification' });
+    let { user } = await findUserFromToken(req, reply);
 
     if(user.lastEmailChange!.getTime() > Date.now() - 600000)
       return reply.code(429).send({ ok: false, error: 'You can only change your email every 10 minutes' });
@@ -307,41 +207,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
 
-    if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
-    if(!req.query.token)return reply.code(400).send({ ok: false, error: 'Invalid Query String' });
-
-    let session = await sessions.findOne({ token: req.query.token });
-    if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
-
-    if(req.headers['cf-connecting-ip'] !== session.loc!.ip)
-      return reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    
-    let user = await users.findById(session.userID);
-    if(!user){
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-      
-    if(!user.emailVerified)
-      return reply.code(403).send({ ok: false, error: 'Verify Email' });
-
-    if(user.hasMfa && !session.hasMfa)
-      return reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-
-    if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
-      user.sessions = user.sessions.filter(x => x !== session!._id);
-      await user.save();
-
-      await sessions.deleteOne({ _id: session._id });
-      reply.code(401).send({ ok: false, error: 'Invalid Session' });
-
-      return;
-    }
-
-    if(!session.valid)
-      return reply.code(403).send({ ok: false, error: 'Session requires verification' });
+    let { user } = await findUserFromToken(req, reply);
 
     if(user.lastAvatarChange!.getTime() > Date.now() - 600000)
       return reply.code(429).send({ ok: false, error: 'You can only change your avatar every 10 minutes' });
