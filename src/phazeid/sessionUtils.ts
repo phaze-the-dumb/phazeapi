@@ -2,6 +2,19 @@ import users from "./db/users"
 import sessions from "./db/sessions";
 import { FastifyReply, FastifyRequest } from "fastify";
 
+let ipLocCache: any = {};
+
+let getIpInfo = async ( ip: string ) => {
+  if(!ipLocCache[ip]){
+    let ipReq = await fetch(`https://ipinfo.io/${ip}?token=${process.env.IPINFO_KEY}`);
+    let ipInfo = await ipReq.json();
+
+    ipLocCache[ip] = ipInfo.region + ' ' + ipInfo.city;
+  }
+
+  return ipLocCache[ip];
+}
+
 export let cleanSessionsForUser = async ( userID: string ): Promise<any[]> => {
   let user = await users.findById(userID);
   if(!user)return [];
@@ -33,6 +46,7 @@ export let findUserFromToken = async (
   opts?: { dontRequireMfa?: boolean, dontRequireEmail?: boolean, dontRequireEmailVerification?: boolean }
 ): Promise<{ session: any, user: any }> => {
   if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
+
   if(!req.query.token){
     reply.code(400).send({ ok: false, error: 'Invalid Query String' });
     return { session: null, user: null };
@@ -44,7 +58,7 @@ export let findUserFromToken = async (
     return { session: null, user: null };
   }
 
-  if(req.headers['cf-connecting-ip'] !== session.loc!.ip){
+  if(await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
     return { session: null, user: null };
   }

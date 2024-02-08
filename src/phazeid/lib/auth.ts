@@ -66,7 +66,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         _id: crypto.randomUUID(),
         token: crypto.randomBytes(32).toString('hex'),
         createdOn: new Date(),
-        expiresOn: new Date(Date.now() + 259200000),
+        expiresOn: new Date(Date.now() + 604800000),
         loc: ipInfo,
         valid: true,
         challengeCode: '',
