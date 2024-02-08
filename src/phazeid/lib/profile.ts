@@ -6,7 +6,6 @@ import * as aviUtils from '../aviUtils';
 import { findUserFromToken } from "../sessionUtils";
 
 import users from "../db/users";
-import sessions from "../db/sessions";
 
 export let main = async ( fastify: FastifyInstance, transport: Transporter ) => {
   fastify.get<{ Querystring: { token: string }, Params: { user: string } }>(
@@ -61,7 +60,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   })
 
-  fastify.options('/id/v1/profile/username', ( req, reply ) => {
+  fastify.options('/id/v1/profile/username', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");
@@ -106,7 +105,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.send({ ok: true });
   })
 
-  fastify.options('/id/v1/profile/email', ( req, reply ) => {
+  fastify.options('/id/v1/profile/email', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");
@@ -177,7 +176,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.send({ ok: true });
   })
 
-  fastify.options('/id/v1/profile/avatar', ( req, reply ) => {
+  fastify.options('/id/v1/profile/avatar', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");

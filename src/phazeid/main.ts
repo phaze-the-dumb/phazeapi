@@ -5,6 +5,7 @@ import * as nodemailer from 'nodemailer';
 import * as auth from './lib/auth';
 import * as email from './lib/email';
 import * as profile from './lib/profile';
+import * as oauth from './lib/oauth';
 
 let main = async ( fastify: FastifyInstance ) => {
   mongoose.connect(process.env.MONGO_URI!)
@@ -29,6 +30,9 @@ let main = async ( fastify: FastifyInstance ) => {
 
   // Profile
   await profile.main(fastify, transport);
+
+  // OAuth
+  await oauth.main(fastify);
 }
 
 export default main;

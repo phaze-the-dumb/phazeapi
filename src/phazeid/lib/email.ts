@@ -7,7 +7,7 @@ import users from "../db/users";
 import sessions from "../db/sessions";
 
 export let main = async ( fastify: FastifyInstance ) => {
-  fastify.options('/id/v1/email/verify', ( req, reply ) => {
+  fastify.options('/id/v1/email/verify', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -16,7 +16,7 @@ export let main = async ( fastify: FastifyInstance ) => {
     reply.send('200 OK');
   })
 
-  fastify.post<{ Body: VerifyRequestBodyType, Querystring: { token: String } }>(
+  fastify.post<{ Body: VerifyRequestBodyType, Querystring: { token: string } }>(
     '/id/v1/email/verify',
     {
       schema: {

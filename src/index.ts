@@ -26,6 +26,7 @@ let main = async () => {
       tags: [
         { name: 'PhazeID (Auth)', description: 'Endpoints used to authenticate users.' },
         { name: 'PhazeID (Email)', description: 'Endpoints relating to emails.' },
+        { name: 'PhazeID (OAuth)', description: 'Endpoints relating to oauth.' },
         { name: 'PhazeID (Profile)', description: 'Endpoints used for users profiles.' },
         { name: 'Internal', description: 'Internal endpoints, Locked Down.' },
       ],

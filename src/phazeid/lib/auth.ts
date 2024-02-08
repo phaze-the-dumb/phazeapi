@@ -16,7 +16,7 @@ import users from "../db/users";
 import sessions from "../db/sessions";
 
 export let main = async ( fastify: FastifyInstance, transport: Transporter ) => {
-  fastify.options('/id/v1/auth/signup', ( req, reply ) => {
+  fastify.options('/id/v1/auth/signup', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -128,7 +128,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/login', ( req, reply ) => {
+  fastify.options('/id/v1/auth/login', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -231,7 +231,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/resetpassword', ( req, reply ) => {
+  fastify.options('/id/v1/auth/resetpassword', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -296,7 +296,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/resetpassword/reset', ( req, reply ) => {
+  fastify.options('/id/v1/auth/resetpassword/reset', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -410,7 +410,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/sessions', ( req, reply ) => {
+  fastify.options('/id/v1/auth/sessions', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "DELETE,GET");
@@ -456,7 +456,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/sessions/verify', ( req, reply ) => {
+  fastify.options('/id/v1/auth/sessions/verify', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -515,7 +515,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
   
-  fastify.options('/id/v1/auth/mfa', ( req, reply ) => {
+  fastify.options('/id/v1/auth/mfa', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST");
@@ -568,7 +568,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     }
   )
 
-  fastify.options('/id/v1/auth/mfa/enable', ( req, reply ) => {
+  fastify.options('/id/v1/auth/mfa/enable', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "POST,GET");
@@ -702,7 +702,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.send({ ok: true })
   })
 
-  fastify.options('/id/v1/auth/password', ( req, reply ) => {
+  fastify.options('/id/v1/auth/password', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
     reply.header("Access-Control-Allow-Methods", "PUT");
