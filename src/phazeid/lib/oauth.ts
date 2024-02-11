@@ -33,7 +33,7 @@ export let main = async ( fastify: FastifyInstance ) => {
           409: ResponseError,
           200: { 
             ok: { type: 'boolean' },
-            token: { type: 'string' }
+            url: { type: 'string' }
           }
         }
       }
@@ -60,7 +60,7 @@ export let main = async ( fastify: FastifyInstance ) => {
         userID: user._id
       })
 
-      reply.send({ ok: true, url: app.redirectUri + '?token='+osession.token+'&id='+osession._id });
+      reply.send({ ok: true, url: app.redirectUri + '?token=' + osession.token + '&id=' + osession._id });
     }
   )
 
