@@ -404,6 +404,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header("Access-Control-Allow-Methods", "GET");
 
       let { session, user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
       let sessionsList = await cleanSessionsForUser(user._id!);
       reply.send({ ok: true, currentSession: session._id, sessionCount: sessionsList.length, sessions: sessionsList.map(x => { return { _id: x._id, valid: x.valid, createdOn: x.createdOn.getTime(), expiresOn: x.expiresOn.getTime(), loc: x.loc } }) })
@@ -443,6 +444,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header("Access-Control-Allow-Methods", "DELETE");
 
       let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
       let sessionToRemove = await sessions.findById(req.query.sessionId);
       if(!sessionToRemove)return reply.code(404).send({ ok: false, error: 'Cannot find session' });
@@ -490,6 +492,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header("Access-Control-Allow-Methods", "POST");
 
       let { session, user } = await findUserFromToken(req, reply, { dontRequireEmail: true, dontRequireMfa: true });
+      if(!user)return;
 
       if(session.valid)
         return reply.code(409).send({ ok: false, error: 'Email already verified' });
@@ -548,6 +551,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header("Access-Control-Allow-Methods", "POST");
 
       let { session, user } = await findUserFromToken(req, reply, { dontRequireMfa: true });
+      if(!user)return;
 
       if(!user.hasMfa || session.hasMfa)
         return reply.code(403).send({ ok: false, error: 'User does not have MFA enabled, or session is already verified' });
@@ -600,8 +604,8 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
       reply.header("Access-Control-Allow-Methods", "GET");
 
-     
       let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
       if(user.hasMfa) 
         return reply.code(409).send({ ok: false, error: 'Already has MFA' });
@@ -652,6 +656,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header("Access-Control-Allow-Methods", "POST");
 
       let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
       if(user.hasMfa) 
         return reply.code(409).send({ ok: false, error: 'Already has MFA' });
@@ -694,6 +699,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
     
     let { user } = await findUserFromToken(req, reply);
+    if(!user)return;
 
     user.hasMfa = false;
     user.mfaString = '';
@@ -736,6 +742,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
     reply.header("Access-Control-Allow-Methods", "PUT");
 
     let { session, user } = await findUserFromToken(req, reply);
+    if(!user)return;
 
     if(!await argon2.verify(user.password!, req.body.previousPass, { type: argon2.argon2id }))
       return reply.code(403).send({ ok: false, error: 'Incorrect Password' });

@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 let schema = new mongoose.Schema({
   _id: String,
 
-  ownerID: String,
   token: String,
-  redirectUri: String
+  appID: String,
+  valid: Boolean,
+  userID: String
 })
 
-export default mongoose.model('App', schema);
+export default mongoose.model('OauthSession', schema);

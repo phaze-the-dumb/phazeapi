@@ -31,34 +31,39 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       }
     },
     async ( req, reply ) => {
-    reply.header('Content-Type', 'application/json');
-    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
-    reply.header("Access-Control-Allow-Methods", "GET");
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "GET");
 
-    let { user } = await findUserFromToken(req, reply);
+      let { user, oauth } = await findUserFromToken(req, reply, { allowOAuth: true });
+      if(!user)return;
 
-    if(req.params.user === '@me'){
-      reply.send({
-        ok: true,
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        hasMfa: user.hasMfa,
-        avatar: user.avatar
-      })
-    } else{
-      let findUser = await users.findById(req.params.user);
-      if(!findUser)
-        return reply.code(404).send({ ok: false, error: 'User not found' });
+      if(req.params.user === '@me'){
+        reply.send({
+          ok: true,
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          hasMfa: user.hasMfa,
+          avatar: user.avatar
+        })
+      } else{
+        if(oauth)
+          return reply.code(404).send({ ok: false, error: 'User not found' });
 
-      reply.send({
-        ok: true,
-        id: findUser._id,
-        username: findUser.username,
-        avatar: findUser.avatar
-      })
+        let findUser = await users.findById(req.params.user);
+        if(!findUser)
+          return reply.code(404).send({ ok: false, error: 'User not found' });
+
+        reply.send({
+          ok: true,
+          id: findUser._id,
+          username: findUser.username,
+          avatar: findUser.avatar
+        })
+      }
     }
-  })
+  )
 
   fastify.options('/id/v1/profile/username', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
@@ -86,24 +91,26 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       }
     },
     async ( req, reply ) => {
-    reply.header('Content-Type', 'application/json');
-    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
-    reply.header("Access-Control-Allow-Methods", "PUT");
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "PUT");
 
-    let { user } = await findUserFromToken(req, reply);
+      let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
-    if(user.lastUsernameChange!.getTime() > Date.now() - 600000)
-      return reply.code(429).send({ ok: false, error: 'You can only change your username every 10 minutes' });
-    
-    let existsUser = await users.findOne({ username: req.body.username });
-    if(existsUser)return reply.code(409).send({ ok: false, error: 'User already exists' });
+      if(user.lastUsernameChange!.getTime() > Date.now() - 600000)
+        return reply.code(429).send({ ok: false, error: 'You can only change your username every 10 minutes' });
+      
+      let existsUser = await users.findOne({ username: req.body.username });
+      if(existsUser)return reply.code(409).send({ ok: false, error: 'User already exists' });
 
-    user.username = req.body.username;
-    user.lastUsernameChange = new Date();
-    await user.save();
+      user.username = req.body.username;
+      user.lastUsernameChange = new Date();
+      await user.save();
 
-    reply.send({ ok: true });
-  })
+      reply.send({ ok: true });
+    }
+  )
 
   fastify.options('/id/v1/profile/email', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
@@ -133,48 +140,50 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       }
     },
     async ( req, reply ) => {
-    reply.header('Content-Type', 'application/json');
-    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
-    reply.header("Access-Control-Allow-Methods", "PUT");
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header("Access-Control-Allow-Methods", "PUT");
 
-    
-    let { user } = await findUserFromToken(req, reply);
+      
+      let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
-    if(user.lastEmailChange!.getTime() > Date.now() - 600000)
-      return reply.code(429).send({ ok: false, error: 'You can only change your email every 10 minutes' });
-    
-    let existsUser = await users.findOne({ email: req.body.email });
-    if(existsUser)return reply.code(409).send({ ok: false, error: 'User already exists' });
+      if(user.lastEmailChange!.getTime() > Date.now() - 600000)
+        return reply.code(429).send({ ok: false, error: 'You can only change your email every 10 minutes' });
+      
+      let existsUser = await users.findOne({ email: req.body.email });
+      if(existsUser)return reply.code(409).send({ ok: false, error: 'User already exists' });
 
-    user.email = req.body.email;
-    user.emailVerified = false;
-    user.emailVerificationCode = Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0');
+      user.email = req.body.email;
+      user.emailVerified = false;
+      user.emailVerificationCode = Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0');
 
-    user.lastEmailChange = new Date();
+      user.lastEmailChange = new Date();
 
-    let mail = () => {
-      return new Promise<{ err: any, info: any }>(( res, rej ) => {
-        transport.sendMail({
-          from: 'Phaze ID <no-reply@phazed.xyz>',
-          to: user!.email!,
-          subject: 'Verification Email',
-          html: `Your verification code is ${ user!.emailVerificationCode }<br />Do <b>NOT</b> share this code with anyone.`
-        }, ( err, info ) => {
-          res({ err, info });
+      let mail = () => {
+        return new Promise<{ err: any, info: any }>(( res, rej ) => {
+          transport.sendMail({
+            from: 'Phaze ID <no-reply@phazed.xyz>',
+            to: user!.email!,
+            subject: 'Verification Email',
+            html: `Your verification code is ${ user!.emailVerificationCode }<br />Do <b>NOT</b> share this code with anyone.`
+          }, ( err, info ) => {
+            res({ err, info });
+          })
         })
-      })
+      }
+
+      let sent = await mail();
+
+      if(sent.err){
+        console.error(sent.err);
+        return reply.code(500).send({ ok: false, error: 'Failed to verify email' });
+      }
+
+      await user.save();
+      reply.send({ ok: true });
     }
-
-    let sent = await mail();
-
-    if(sent.err){
-      console.error(sent.err);
-      return reply.code(500).send({ ok: false, error: 'Failed to verify email' });
-    }
-
-    await user.save();
-    reply.send({ ok: true });
-  })
+  )
 
   fastify.options('/id/v1/profile/avatar', { schema: { hide: true } }, ( req, reply ) => {
     reply.header('Content-Type', 'application/json');
@@ -203,26 +212,28 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       }
     },
     async ( req, reply ) => {
-    reply.header('Content-Type', 'application/json');
-    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
 
-    let { user } = await findUserFromToken(req, reply);
+      let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
-    if(user.lastAvatarChange!.getTime() > Date.now() - 600000)
-      return reply.code(429).send({ ok: false, error: 'You can only change your avatar every 10 minutes' });
+      if(user.lastAvatarChange!.getTime() > Date.now() - 600000)
+        return reply.code(429).send({ ok: false, error: 'You can only change your avatar every 10 minutes' });
 
-    let data = await req.file();
-    if(!data)
-      return reply.code(500).send({ ok: false, error: 'No file attached' });
+      let data = await req.file();
+      if(!data)
+        return reply.code(500).send({ ok: false, error: 'No file attached' });
 
-    let newAviId = crypto.randomUUID();
+      let newAviId = crypto.randomUUID();
 
-    aviUtils.deleteAvi(user._id + '/' + user.avatar);
-    aviUtils.upload(await data.toBuffer(), user._id + '/' + newAviId);
+      aviUtils.deleteAvi(user._id + '/' + user.avatar);
+      aviUtils.upload(await data.toBuffer(), user._id + '/' + newAviId);
 
-    user.avatar = newAviId;
-    await user.save();
+      user.avatar = newAviId;
+      await user.save();
 
-    reply.send({ ok: true });
-  })
+      reply.send({ ok: true });
+    }
+  )
 }
