@@ -79,7 +79,7 @@ export let main = async ( fastify: FastifyInstance ) => {
           401: ResponseError,
           403: ResponseError,
           409: ResponseError,
-          200: { 
+          200: {
             ok: { type: 'boolean' },
             appname: { type: 'string' },
             appuri: { type: 'string' }
