@@ -43,6 +43,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
 
       let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
 
       if(!req.query.appid)
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
@@ -59,7 +60,48 @@ export let main = async ( fastify: FastifyInstance ) => {
         userID: user._id
       })
 
-      reply.redirect(app.redirectUri + '?token='+osession.token+'&id='+osession._id);
+      reply.send({ ok: true, url: app.redirectUri + '?token='+osession.token+'&id='+osession._id });
+    }
+  )
+
+  fastify.get<{ Querystring: { token: string, appid: string } }>(
+    '/id/v1/oauth/app',
+    {
+      schema: {
+        summary: 'Get an OAuth app info',
+        tags: [ 'PhazeID (OAuth)' ],
+        querystring: {
+          token: { type: 'string' },
+          appid: { type: 'string' }
+        },
+        response: {
+          400: ResponseError,
+          401: ResponseError,
+          403: ResponseError,
+          409: ResponseError,
+          200: { 
+            ok: { type: 'boolean' },
+            appname: { type: 'string' },
+            appuri: { type: 'string' }
+          }
+        }
+      }
+    },
+    async ( req, reply ) => {
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
+      let { user } = await findUserFromToken(req, reply);
+      if(!user)return;
+
+      if(!req.query.appid)
+        return reply.code(400).send({ ok: false, error: 'Bad Request' });
+
+      let app = await apps.findById(req.query.appid);
+      if(!app)
+        return reply.code(400).send({ ok: false, error: 'Bad Request' });
+
+      reply.send({ ok: true, appname: app.name, appuri: app.redirectUri })
     }
   )
 
