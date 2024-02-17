@@ -49,7 +49,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
 
       if(req.headers["content-type"] !== 'application/json')return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
-      if(!req.body || !req.body.username || !req.body.password || !req.body.email)return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
+      if(!req.body || !req.body.username || !req.body.password || !req.body.email || req.body.username === "")return reply.code(400).send({ ok: false, error: 'Invalid Request Body' });
 
       let user = await users.findOne({ username: req.body.username });
       if(user)return reply.code(409).send({ ok: false, error: 'User Already Exists' });

@@ -104,6 +104,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       let existsUser = await users.findOne({ username: req.body.username });
       if(existsUser)return reply.code(409).send({ ok: false, error: 'User already exists' });
 
+      if(req.body.username === '')
+        return reply.code(400).send({ ok: false, error: 'Username cannot be blank' });
+
       user.username = req.body.username;
       user.lastUsernameChange = new Date();
       await user.save();

@@ -112,8 +112,8 @@ export let main = async ( fastify: FastifyInstance ) => {
         summary: 'Enables an OAuth token',
         tags: [ 'PhazeID (OAuth)' ],
         querystring: {
-          token: { type: 'string' },
-          appid: { type: 'string' }
+          apptoken: { type: 'string' },
+          sesid: { type: 'string' }
         },
         response: {
           400: ResponseError,
