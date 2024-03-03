@@ -550,7 +550,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
       reply.header("Access-Control-Allow-Methods", "POST");
 
-      let { session, user } = await findUserFromToken(req, reply, { dontRequireMfa: true });
+      let { session, user } = await findUserFromToken(req, reply, { dontRequireMfa: true, dontRequireEmail: true });
       if(!user)return;
 
       if(!user.hasMfa || session.hasMfa)
