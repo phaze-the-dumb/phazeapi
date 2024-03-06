@@ -187,7 +187,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       if(user.loginAttempts > 5){
         user.accountLocked = true;
         user.lockedUntil = Date.now() + 900000;
+        user.loginAttempts = 0;
 
+        user.save();
         return reply.code(403).send({ ok: false, error: 'Account locked until ' + (new Date(user.lockedUntil)).toString() });
       }
 
