@@ -9,7 +9,11 @@ let schema = new mongoose.Schema({
   lastUsernameChange: Date,
   lastPasswordChange: Date,
 
-  passwordChangeToken: String,  
+  passwordChangeToken: String,
+
+  loginAttempts: Number,
+  accountLocked: Boolean,
+  lockedUntil: Number,
 
   email: String,
   emailVerificationCode: String,

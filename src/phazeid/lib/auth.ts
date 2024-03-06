@@ -82,6 +82,10 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         lastUsernameChange: new Date(),
         lastPasswordChange: new Date(),
 
+        loginAttempts: 0,
+        accountLocked: false,
+        lockedUntil: 0,
+
         email: req.body.email,
         emailVerificationCode: Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0'),
         emailVerified: false,
@@ -164,6 +168,31 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       let user = await users.findOne({ username: req.body.username });
       if(!user)return reply.code(403).send({ ok: false, error: 'Incorrect Username or Password' });
 
+      if(!user.loginAttempts)
+        user.loginAttempts = 0;
+
+      if(!user.lockedUntil)
+        user.lockedUntil = 0;
+
+
+      if(user.accountLocked){
+        if(user.lockedUntil < Date.now())
+          user.accountLocked = false;
+        else
+          return reply.code(403).send({ ok: false, error: 'Account locked until ' + (new Date(user.lockedUntil)).toString() });
+      }
+
+      user.loginAttempts++;
+
+      if(user.loginAttempts > 5){
+        user.accountLocked = true;
+        user.lockedUntil = Date.now() + 900000;
+
+        return reply.code(403).send({ ok: false, error: 'Account locked until ' + (new Date(user.lockedUntil)).toString() });
+      }
+
+      user.save();
+
       let isValid = await argon2.verify(user.password!, req.body.password, { type: argon2.argon2id });
 
       if(isValid){
@@ -211,6 +240,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         }
 
         user.sessions.push(session._id!);
+        user.loginAttempts = 0;
         await user.save();
 
         reply.send({ ok: true, session: session.token, requiresMfa: user.hasMfa, valid: session.valid })
