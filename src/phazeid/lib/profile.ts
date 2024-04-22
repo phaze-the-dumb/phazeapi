@@ -117,7 +117,6 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       console.log(user);
       user.allowedApps.forEach(async ( appID: string ) => {
         let app = await apps.findById(appID);
-        console.log(appID, app);
         if(!app || !app.profileUpdateHook)return;
 
         fetch(app.profileUpdateHook, {

@@ -7,6 +7,7 @@ import { ResponseError } from "../types/ResponseError";
 
 import apps from "../db/app";
 import oauthsessions from "../db/oauthsession";
+import users from "../db/users";
 
 // OAuth flow
 /*
@@ -59,6 +60,11 @@ export let main = async ( fastify: FastifyInstance ) => {
         valid: false,
         userID: user._id
       })
+
+      if(user.allowedApps.indexOf(app._id) == -1){
+        user.allowedApps.push(app._id);
+        await user.save();
+      }
 
       reply.send({ ok: true, url: app.redirectUri + '?token=' + osession.token + '&id=' + osession._id });
     }
