@@ -124,7 +124,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
             "value": user.username,
             "user": user._id
           }
-        })
+        }).then(data => data.text()).then(data => console.log(data));
       })
     }
   )
@@ -262,7 +262,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
             "value": user.avatar,
             "user": user._id
           }
-        })
+        }).then(data => data.text()).then(data => console.log(data));
       })
     }
   )
