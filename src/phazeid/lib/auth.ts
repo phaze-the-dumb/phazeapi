@@ -206,6 +206,9 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         let sessionValid = sessionsList.find(x => x.loc.ip === ipInfo.ip);
         if(!sessionValid || !sessionValid.valid)sessionValid = null;
 
+        if(user.hasMfa)
+          sessionValid = true;
+
         let session = await sessions.create({
           _id: crypto.randomUUID(),
           token: crypto.randomBytes(32).toString('hex'),
@@ -247,7 +250,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
         reply.send({ ok: true, session: session.token, requiresMfa: user.hasMfa, valid: session.valid })
 
-        if(session.valid){
+        if(session.valid && !user.hasMfa){
           transport.sendMail({
             from: 'Phaze ID <no-reply@phazed.xyz>',
             to: user!.email!,
@@ -601,6 +604,16 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await session.save();
 
       reply.send({ ok: true });
+
+      transport.sendMail({
+        from: 'Phaze ID <no-reply@phazed.xyz>',
+        to: user!.email!,
+        subject: 'Log-in Notification',
+        html: `Hello ${user.username},<br /><br />There has just been a successful login attempt to your account<br /><br />IP Address: ${session.geo.ip}<br />User-Agent: ${req.headers['user-agent']}<br /><br />If you do not recognise this login attempt, please contact _phaz on discord immediately.<br />Best regards, Phaze.`
+      }, ( err, info ) => {
+        if(err)
+          console.error(err);
+      })
     }
   )
 
