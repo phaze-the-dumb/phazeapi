@@ -114,6 +114,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       reply.send({ ok: true });
 
+      console.log(user);
       user.allowedApps.forEach(async ( appID: string ) => {
         let app = await apps.findById(appID);
         console.log(appID, app);
