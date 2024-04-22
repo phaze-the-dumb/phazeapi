@@ -179,4 +179,39 @@ export let main = async ( fastify: FastifyInstance ) => {
       reply.send({ ok: true });
     }
   )
+
+  fastify.delete<{ Querystring: { apptoken: string, userid: string } }>(
+    '/id/v1/oauth/app',
+    {
+      schema: {
+        summary: 'Deauthorizes an OAuth app',
+        tags: [ 'PhazeID (OAuth)' ],
+        querystring: {
+          apptoken: { type: 'string' },
+          userid: { type: 'string' },
+        },
+        response: {
+          401: ResponseError,
+          200: { ok: { type: 'boolean' } }
+        }
+      }
+    },
+    async ( req, reply ) => {
+      reply.header('Content-Type', 'application/json');
+      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
+      let app = await apps.findOne({ token: req.query.apptoken });
+      if(!app)
+        return reply.code(401).send({ ok: false, error: 'Unauthorized' });
+
+      let user = await users.findById(req.query.userid);
+      if(!user)
+        return reply.code(401).send({ ok: false, error: 'Invalid UserID' });
+
+      user.allowedApps = user.allowedApps.filter(x => x !== app._id);
+      await user.save();
+
+      reply.send({ ok: true });
+    }
+  )
 }
