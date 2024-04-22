@@ -609,7 +609,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         from: 'Phaze ID <no-reply@phazed.xyz>',
         to: user!.email!,
         subject: 'Log-in Notification',
-        html: `Hello ${user.username},<br /><br />There has just been a successful login attempt to your account<br /><br />IP Address: ${session.geo.ip}<br />User-Agent: ${req.headers['user-agent']}<br /><br />If you do not recognise this login attempt, please contact _phaz on discord immediately.<br />Best regards, Phaze.`
+        html: `Hello ${user.username},<br /><br />There has just been a successful login attempt to your account<br /><br />IP Address: ${session.loc.ip}<br />User-Agent: ${req.headers['user-agent']}<br /><br />If you do not recognise this login attempt, please contact _phaz on discord immediately.<br />Best regards, Phaze.`
       }, ( err, info ) => {
         if(err)
           console.error(err);
