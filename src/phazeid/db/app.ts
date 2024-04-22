@@ -5,7 +5,8 @@ let schema = new mongoose.Schema({
   name: String,
   ownerID: String,
   token: String,
-  redirectUri: String
+  redirectUri: String,
+  profileUpdateHook: String
 })
 
 export default mongoose.model('App', schema);

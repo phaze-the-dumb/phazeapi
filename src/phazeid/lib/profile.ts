@@ -6,6 +6,7 @@ import * as aviUtils from '../aviUtils';
 import { findUserFromToken } from "../sessionUtils";
 
 import users from "../db/users";
+import apps from '../db/app';
 
 export let main = async ( fastify: FastifyInstance, transport: Transporter ) => {
   fastify.get<{ Querystring: { token: string }, Params: { user: string } }>(
@@ -112,6 +113,19 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await user.save();
 
       reply.send({ ok: true });
+
+      user.allowedApps.forEach(async ( appID: string ) => {
+        let app = await apps.findById(appID);
+        if(!app || !app.profileUpdateHook)return;
+
+        fetch(app.profileUpdateHook, {
+          headers: {
+            "update-type": "username",
+            "value": user.username,
+            "user": user._id
+          }
+        })
+      })
     }
   )
 
@@ -237,6 +251,19 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await user.save();
 
       reply.send({ ok: true });
+
+      user.allowedApps.forEach(async ( appID: string ) => {
+        let app = await apps.findById(appID);
+        if(!app || !app.profileUpdateHook)return;
+
+        fetch(app.profileUpdateHook, {
+          headers: {
+            "update-type": "avatar",
+            "value": user.avatar,
+            "user": user._id
+          }
+        })
+      })
     }
   )
 }
