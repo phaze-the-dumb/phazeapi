@@ -208,8 +208,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       if(!user)
         return reply.code(401).send({ ok: false, error: 'Invalid UserID' });
 
-      console.log(user.allowedApps, app._id!);
-      user.allowedApps = user.allowedApps.filter(x => x !== app._id!);
+      user.allowedApps = user.allowedApps.filter(x => x !== app!._id!);
       await user.save();
 
       reply.send({ ok: true });
