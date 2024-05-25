@@ -63,7 +63,7 @@ export let main = async ( fastify: FastifyInstance ) => {
         await user.save();
       }
 
-      reply.send({ ok: true, url: app.redirectUri + '?token=' + session.oauthSession + '&id=' + session._id });
+      reply.send({ ok: true, url: app.redirectUri + '?token=' + session.oauthSession });
     }
   )
 
@@ -105,44 +105,6 @@ export let main = async ( fastify: FastifyInstance ) => {
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
 
       reply.send({ ok: true, appname: app.name, appuri: app.redirectUri })
-    }
-  )
-
-  fastify.put<{ Querystring: { apptoken: string, sesid: string } }>(
-    '/id/v1/oauth/enable',
-    {
-      schema: {
-        summary: 'Enables an auth token',
-        tags: [ 'PhazeID (External Auth)' ],
-        querystring: {
-          apptoken: { type: 'string' },
-          sesid: { type: 'string' }
-        },
-        response: {
-          400: ResponseError,
-          401: ResponseError,
-          403: ResponseError,
-          409: ResponseError,
-          200: { ok: { type: 'boolean' } }
-        }
-      }
-    },
-    async ( req, reply ) => {
-      reply.header('Content-Type', 'application/json');
-      reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
-
-      let app = await apps.findOne({ token: req.query.apptoken });
-      if(!app)
-        return reply.code(401).send({ ok: false, error: 'Unauthorized' });
-
-      let ses = await sessions.findById(req.query.sesid);
-      if(!ses)
-        return reply.code(400).send({ ok: false, error: 'Invalid Session ID' });
-
-      ses.oauthEnabled = true;
-      await ses.save();
-
-      reply.send({ ok: true });
     }
   )
 

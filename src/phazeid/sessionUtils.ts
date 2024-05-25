@@ -15,22 +15,6 @@ let getIpInfo = async ( ip: string ) => {
   return ipLocCache[ip];
 }
 
-let useOAuth = async ( session: any, reply: FastifyReply ): Promise<{ session: any; user: any; oauth: boolean }> => {
-  let user = await users.findById(session.userID);
-  if(!user){
-    await sessions.deleteOne({ _id: session._id });
-    reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth: true };
-  }
-
-  if(!session.valid){
-    reply.code(403).send({ ok: false, error: 'Session requires verification' });
-    return { session: null, user: null, oauth: true };
-  }
-
-  return { session, user, oauth: true };
-}
-
 export let cleanSessionsForUser = async ( userID: string ): Promise<any[]> => {
   let user = await users.findById(userID);
   if(!user)return [];
@@ -68,43 +52,43 @@ export let findUserFromToken = async (
     return { session: null, user: null, oauth: false };
   }
 
+  let oauth = false;
   let session = await sessions.findOne({ token: req.query.token });
   if(!session){
     if(opts?.allowOAuth){
       session = await sessions.findOne({ oauthSession: req.query.token });
+      oauth = true;
 
       if(!session){
         reply.code(401).send({ ok: false, error: 'Invalid Token' });
-        return { session: null, user: null, oauth: false };
+        return { session: null, user: null, oauth };
       }
-
-      return useOAuth(session, reply);
     } else{
       reply.code(401).send({ ok: false, error: 'Invalid Token' });
-      return { session: null, user: null, oauth: false };
+      return { session: null, user: null, oauth };
     }
   }
 
   if(await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
   
   let user = await users.findById(session.userID);
   if(!user){
     await sessions.deleteOne({ _id: session._id });
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
 
   if(!user.emailVerified && !opts?.dontRequireEmailVerification){
     reply.code(403).send({ ok: false, error: 'Verify Email' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
 
   if(user.hasMfa && !session.hasMfa && !opts?.dontRequireMfa){
     reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
 
   if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
@@ -113,13 +97,13 @@ export let findUserFromToken = async (
 
     await sessions.deleteOne({ _id: session._id });
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
 
   if(!session.valid && !opts?.dontRequireEmail){
     reply.code(403).send({ ok: false, error: 'Session requires verification' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null, oauth };
   }
 
-  return { session, user, oauth: false }
+  return { session, user, oauth }
 }

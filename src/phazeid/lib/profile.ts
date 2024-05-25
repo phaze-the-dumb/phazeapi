@@ -6,7 +6,6 @@ import * as aviUtils from '../aviUtils';
 import { findUserFromToken } from "../sessionUtils";
 
 import users from "../db/users";
-import apps from '../db/app';
 
 export let main = async ( fastify: FastifyInstance, transport: Transporter ) => {
   fastify.get<{ Querystring: { token: string }, Params: { user: string } }>(
