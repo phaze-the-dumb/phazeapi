@@ -77,7 +77,7 @@ export let main = async ( fastify: FastifyInstance ) => {
     let puser = await userReq.json();
 
     user.patreon.lastUpdate = Date.now();
-    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data;
+    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id) !== -1);
     user.patreon.refreshToken = data.refresh_token;
 
     await user.save();
@@ -108,7 +108,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       let puser = await userReq.json();
 
       user.patreon.lastUpdate = Date.now();
-      user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data;
+      user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id) !== -1);
       user.patreon.refreshToken = data.refresh_token;
   
       await user.save();
