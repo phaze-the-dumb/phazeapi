@@ -37,18 +37,16 @@ export let main = async ( fastify: FastifyInstance ) => {
 
     let puser = await userReq.json();
 
-    if(!user.patreon){
-      user.patreon = {
-        id: puser.data.id,
-        currentTiers: [],
-        lastUpdate: 0,
-        token: data.access_token,
-        refreshToken: data.refresh_token
-      }
+    user.patreon = {
+      id: puser.data.id,
+      currentTiers: [],
+      lastUpdate: 0,
+      token: data.access_token,
+      refreshToken: data.refresh_token
     }
 
     user.patreon.lastUpdate = Date.now();
-    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id));
+    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id) !== -1);
 
     console.log(user.patreon);
 
