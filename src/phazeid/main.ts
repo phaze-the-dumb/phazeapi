@@ -6,6 +6,7 @@ import * as auth from './lib/auth';
 import * as email from './lib/email';
 import * as profile from './lib/profile';
 import * as oauth from './lib/oauth';
+import * as patreon from './lib/patreon';
 
 let main = async ( fastify: FastifyInstance ) => {
   mongoose.connect(process.env.MONGO_URI!)
@@ -33,6 +34,9 @@ let main = async ( fastify: FastifyInstance ) => {
 
   // OAuth
   await oauth.main(fastify);
+
+  // Patreon
+  await patreon.main(fastify);
 }
 
 export default main;
