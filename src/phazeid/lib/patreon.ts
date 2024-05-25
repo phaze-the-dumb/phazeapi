@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { findUserFromToken } from "../sessionUtils";
 
+const PHAZE_TEIRS: string[] = [ '23051636' ];
+
 export let main = async ( fastify: FastifyInstance ) => {
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
     let { user } = await findUserFromToken(req, reply);
@@ -46,7 +48,9 @@ export let main = async ( fastify: FastifyInstance ) => {
     }
 
     user.patreon.lastUpdate = Date.now();
-    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data;
+    user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id));
+
+    console.log(user.patreon);
 
     await user.save();
     reply.send({ ok: true });
