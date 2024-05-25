@@ -55,8 +55,7 @@ export let main = async ( fastify: FastifyInstance ) => {
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
-    console.log(user.patreon);
-    if(!user.patreon)return reply.send({ ok: false, error: 'You need to login first.' });
+    if(!user.patreon || !user.patreon.id)return reply.send({ ok: false, error: 'You need to login first.' });
     if(user.patreon.lastUpdate + 3.6e+6 > Date.now())return reply.send({ ok: false, error: 'You can only refresh once an hour.' });
 
     let dataReq = await fetch('https://www.patreon.com/api/oauth2/token', {
@@ -89,9 +88,8 @@ export let main = async ( fastify: FastifyInstance ) => {
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
-    if(!user.patreon){
+    if(!user.patreon || !user.patreon.id)
       return reply.send({ ok: false });
-    }
 
     if(user.patreon.lastUpdate + 8.64e+7 < Date.now()){
       let dataReq = await fetch('https://www.patreon.com/api/oauth2/token', {
