@@ -96,9 +96,9 @@ export let main = async ( fastify: FastifyInstance ) => {
         },
         body: `refresh_token=${user.patreon.refreshToken}&grant_type=refresh_token&client_id=${process.env.PATREON_CLIENT_ID}&client_secret=${process.env.PATREON_CLIENT_SECRET}&redirect_uri=https://api.phazed.xyz/id/v1/patreon/callback`
       })
-  
+
       let data = await dataReq.json();
-  
+
       let userReq = await fetch('https://www.patreon.com/api/oauth2/v2/identity?fields%5Btier%5D=title,amount_cents&fields%5Bmember%5D=patron_status,is_follower,full_name&include=memberships.currently_entitled_tiers', {
         headers: {
           'Authorization': 'Bearer ' + data.access_token
