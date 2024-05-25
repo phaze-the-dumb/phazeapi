@@ -20,7 +20,7 @@ export let main = async ( fastify: FastifyInstance ) => {
 
     let data = await dataReq.json();
 
-    let userReq = await fetch('https://www.patreon.com/api/oauth2/v2/identity?fields%5Bmember%5D=patron_status,is_follower,full_name&include=memberships.currently_entitled_tiers', {
+    let userReq = await fetch('https://www.patreon.com/api/oauth2/v2/identity?fields%5Btier%5D=title,amount_cents&fields%5Bmember%5D=patron_status,is_follower,full_name&include=memberships.currently_entitled_tiers', {
       headers: {
         'Authorization': 'Bearer ' + data.access_token
       }
