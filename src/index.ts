@@ -79,7 +79,7 @@ let main = async () => {
 
   await phazeid(fastify);
 
-  fastify.listen({ port: 8080, host: '0.0.0.0' });
+  fastify.listen({ port: 7001, host: '0.0.0.0' });
 
   await fastify.ready();
   fastify.swagger();
