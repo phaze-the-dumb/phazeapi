@@ -1,6 +1,7 @@
 import users from "./db/users"
 import sessions from "./db/sessions";
 import { FastifyReply, FastifyRequest } from "fastify";
+import apps from "./db/app";
 
 let ipLocCache: any = {};
 
@@ -59,7 +60,13 @@ export let findUserFromToken = async (
       session = await sessions.findOne({ oauthSession: req.query.token });
       oauth = true;
 
-      if(session?.oauthApps.indexOf(req.query.apptoken) === -1){
+      let app = await apps.findOne({ token: req.query.apptoken });
+      if(!app){
+        reply.code(401).send({ ok: false, error: 'Invalid App' });
+        return { session: null, user: null, oauth };
+      }
+
+      if(session?.oauthApps.indexOf(app._id!) === -1){
         reply.code(401).send({ ok: false, error: 'Invalid Token' });
         return { session: null, user: null, oauth };
       }
