@@ -52,12 +52,16 @@ export let main = async ( fastify: FastifyInstance ) => {
       if(!app)
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
 
-      if(!session.oauthSession){
-        if(session.oauthApps.indexOf(app._id) === -1){
-          session.oauthApps.push(app._id);
-        }
 
+
+      if(!session.oauthSession){
+        session.oauthApps = [ app._id ];
         session.oauthSession = crypto.randomBytes(32).toString('hex');
+        await session.save();
+      }
+
+      if(session.oauthApps.indexOf(app._id) === -1){
+        session.oauthApps.push(app._id);
         await session.save();
       }
 
