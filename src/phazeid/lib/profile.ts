@@ -113,20 +113,6 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await user.save();
 
       reply.send({ ok: true });
-
-      console.log(user);
-      user.allowedApps.forEach(async ( appID: string ) => {
-        let app = await apps.findById(appID);
-        if(!app || !app.profileUpdateHook)return;
-
-        fetch(app.profileUpdateHook, {
-          headers: {
-            "update-type": "username",
-            "value": user.username,
-            "user": user._id
-          }
-        }).then(data => data.text()).then(data => console.log(data)).catch(e => console.log(e));
-      })
     }
   )
 
@@ -252,19 +238,6 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await user.save();
 
       reply.send({ ok: true });
-
-      user.allowedApps.forEach(async ( appID: string ) => {
-        let app = await apps.findById(appID);
-        if(!app || !app.profileUpdateHook)return;
-
-        fetch(app.profileUpdateHook, {
-          headers: {
-            "update-type": "avatar",
-            "value": user.avatar,
-            "user": user._id
-          }
-        }).then(data => data.text()).then(data => console.log(data)).catch(e => console.log(e));
-      })
     }
   )
 }

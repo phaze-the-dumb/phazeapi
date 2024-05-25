@@ -23,7 +23,10 @@ let schema = new mongoose.Schema({
     org: String,
     postal: String,
     timezone: String
-  }
+  },
+
+  oauthEnabled: Boolean,
+  oauthSession: String
 })
 
 export default mongoose.model('Session', schema);

@@ -1,7 +1,6 @@
 import users from "./db/users"
 import sessions from "./db/sessions";
 import { FastifyReply, FastifyRequest } from "fastify";
-import oauthsessions from "./db/oauthsession";
 
 let ipLocCache: any = {};
 
@@ -72,7 +71,7 @@ export let findUserFromToken = async (
   let session = await sessions.findOne({ token: req.query.token });
   if(!session){
     if(opts?.allowOAuth){
-      session = await oauthsessions.findOne({ token: req.query.token });
+      session = await sessions.findOne({ oauthSession: req.query.token });
 
       if(!session){
         reply.code(401).send({ ok: false, error: 'Invalid Token' });
