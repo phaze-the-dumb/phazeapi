@@ -48,7 +48,7 @@ export let main = async ( fastify: FastifyInstance ) => {
     user.patreon.currentTiers = puser.included[0].relationships.currently_entitled_tiers.data.filter(( x: any ) => PHAZE_TEIRS.indexOf(x.id) !== -1);
 
     await user.save();
-    reply.send({ ok: true });
+    reply.redirect('https://id.phazed.xyz');
   })
 
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon/refresh', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
