@@ -6,7 +6,6 @@ import { findUserFromToken } from "../sessionUtils";
 import { ResponseError } from "../types/ResponseError";
 
 import apps from "../db/app";
-import sessions from "../db/sessions";
 import users from "../db/users";
 
 export let main = async ( fastify: FastifyInstance ) => {
@@ -54,6 +53,10 @@ export let main = async ( fastify: FastifyInstance ) => {
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
 
       if(!session.oauthSession){
+        if(session.oauthApps.indexOf(app._id) === -1){
+          session.oauthApps.push(app._id);
+        }
+
         session.oauthSession = crypto.randomBytes(32).toString('hex');
         await session.save();
       }

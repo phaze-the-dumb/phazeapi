@@ -70,8 +70,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         loc: ipInfo,
         valid: true,
         challengeCode: '',
-        userID,
-        oauthEnabled: false
+        userID
       }
 
       let userData = {
@@ -218,8 +217,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
           loc: ipInfo,
           valid: sessionValid ? true : false,
           challengeCode: sessionValid ? '' : Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0'),
-          userID: user._id,
-          oauthEnabled: false
+          userID: user._id
         })
 
         if(!session.valid){

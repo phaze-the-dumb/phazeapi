@@ -25,7 +25,7 @@ let schema = new mongoose.Schema({
     timezone: String
   },
 
-  oauthEnabled: Boolean,
+  oauthApps: [ String ],
   oauthSession: String
 })
 
