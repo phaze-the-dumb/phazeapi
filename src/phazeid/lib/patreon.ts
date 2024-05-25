@@ -18,7 +18,7 @@ export let main = async ( fastify: FastifyInstance ) => {
 
     console.log(data);
 
-    let userReq = await fetch('https://www.patreon.com/api/oauth2/v2/identity?include=identity.memberships', {
+    let userReq = await fetch('https://www.patreon.com/api/oauth2/v2/identity?include=memberships', {
       headers: {
         'Authorization': 'Bearer ' + data.access_token
       }
