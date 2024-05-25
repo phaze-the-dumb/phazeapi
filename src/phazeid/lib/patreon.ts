@@ -5,6 +5,8 @@ const PHAZE_TEIRS: string[] = [ '23051636' ];
 
 export let main = async ( fastify: FastifyInstance ) => {
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
@@ -12,6 +14,8 @@ export let main = async ( fastify: FastifyInstance ) => {
   })
 
   fastify.get<{ Querystring: { code: string, state: string } }>('/id/v1/patreon/callback', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
@@ -52,6 +56,8 @@ export let main = async ( fastify: FastifyInstance ) => {
   })
 
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon/refresh', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
@@ -84,7 +90,18 @@ export let main = async ( fastify: FastifyInstance ) => {
     reply.send({ ok: true });
   })
 
+  fastify.options('/id/v1/patreon/refresh', { schema: { hide: true } }, ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+
+    reply.send('200 OK');
+  })
+
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon/tiers', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+
     let { user } = await findUserFromToken(req, reply);
     if(!user)return;
 
@@ -118,5 +135,14 @@ export let main = async ( fastify: FastifyInstance ) => {
     }
 
     reply.send({ ok: true, tiers: user.patreon.currentTiers });
+  })
+
+  fastify.options('/id/v1/patreon/tiers', { schema: { hide: true } }, ( req, reply ) => {
+    reply.header('Content-Type', 'application/json');
+    reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
+    reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Headers", "Content-Type");
+
+    reply.send('200 OK');
   })
 }
