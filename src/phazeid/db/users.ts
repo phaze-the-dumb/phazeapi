@@ -29,7 +29,15 @@ let schema = new mongoose.Schema({
   roles: [ String ],
   allowedApps: [ String ],
 
-  sessions: [ String ]
+  sessions: [ String ],
+
+  patreon: {
+    id: String,
+    currentTiers: [ { id: String, title: String } ],
+    lastUpdate: Number,
+    token: String,
+    refreshToken: String
+  }
 })
 
 export default mongoose.model('User', schema);

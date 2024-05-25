@@ -42,22 +42,24 @@ export let cleanSessionsForUser = async ( userID: string ): Promise<any[]> => {
 }
 
 export let findUserFromToken = async ( 
-  req: FastifyRequest<{ Querystring: { token: string, apptoken?: string } }>,
+  req: FastifyRequest<{ Querystring: { token?: string, state?: string, apptoken?: string } }>,
   reply: FastifyReply, 
   opts?: { dontRequireMfa?: boolean, dontRequireEmail?: boolean, dontRequireEmailVerification?: boolean, allowOAuth?: boolean }
 ): Promise<{ session: any, user: any, oauth: boolean }> => {
   if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
 
-  if(!req.query.token){
+  let token = req.query.token || req.query.state;
+
+  if(!token){
     reply.code(400).send({ ok: false, error: 'Invalid Query String' });
     return { session: null, user: null, oauth: false };
   }
 
   let oauth = false;
-  let session = await sessions.findOne({ token: req.query.token });
+  let session = await sessions.findOne({ token: token });
   if(!session){
     if(opts?.allowOAuth && req.query.apptoken){
-      session = await sessions.findOne({ oauthSession: req.query.token });
+      session = await sessions.findOne({ oauthSession: token });
       oauth = true;
 
       let app = await apps.findOne({ token: req.query.apptoken });
