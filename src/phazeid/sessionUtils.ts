@@ -66,12 +66,12 @@ export let findUserFromToken = async (
         return { session: null, user: null, oauth };
       }
 
-      if(session?.oauthApps.indexOf(app._id!) === -1){
+      if(!session){
         reply.code(401).send({ ok: false, error: 'Invalid Token' });
         return { session: null, user: null, oauth };
       }
 
-      if(!session){
+      if(session.oauthApps.indexOf(app._id!) === -1){
         reply.code(401).send({ ok: false, error: 'Invalid Token' });
         return { session: null, user: null, oauth };
       }
@@ -81,7 +81,7 @@ export let findUserFromToken = async (
     }
   }
 
-  if(await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
+  if(!oauth && await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
     return { session: null, user: null, oauth };
   }
