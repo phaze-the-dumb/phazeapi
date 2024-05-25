@@ -33,9 +33,8 @@ let schema = new mongoose.Schema({
 
   patreon: {
     id: String,
-    currentTiers: [ { id: String, title: String } ],
+    currentTiers: [ { id: String } ],
     lastUpdate: Number,
-    token: String,
     refreshToken: String
   }
 })
