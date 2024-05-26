@@ -58,7 +58,7 @@ export let main = async ( fastify: FastifyInstance ) => {
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon/refresh', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
 
-    let { user } = await findUserFromToken(req, reply);
+    let { user } = await findUserFromToken(req, reply, { allowOAuth: true });
     if(!user)return;
 
     if(!user.patreon || !user.patreon.id)return reply.send({ ok: false, error: 'You need to login first.' });
@@ -102,7 +102,7 @@ export let main = async ( fastify: FastifyInstance ) => {
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon/tiers', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
     reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
 
-    let { user } = await findUserFromToken(req, reply);
+    let { user } = await findUserFromToken(req, reply, { allowOAuth: true });
     if(!user)return;
 
     if(!user.patreon || !user.patreon.id)
