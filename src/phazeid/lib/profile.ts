@@ -35,7 +35,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       reply.header('Access-Control-Allow-Origin', 'https://id.phazed.xyz');
       reply.header("Access-Control-Allow-Methods", "GET");
 
-      let { user, oauth } = await findUserFromToken(req, reply, { allowOAuth: true });
+      let { user } = await findUserFromToken(req, reply);
       if(!user)return;
 
       if(req.params.user === '@me'){
@@ -48,9 +48,6 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
           avatar: user.avatar
         })
       } else{
-        if(oauth)
-          return reply.code(404).send({ ok: false, error: 'User not found' });
-
         let findUser = await users.findById(req.params.user);
         if(!findUser)
           return reply.code(404).send({ ok: false, error: 'User not found' });

@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import crypto from 'node:crypto';
 
 import { findUserFromToken } from "../sessionUtils";
 
@@ -52,25 +51,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       if(!app)
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
 
-
-
-      if(!session.oauthSession){
-        session.oauthApps = [ app._id ];
-        session.oauthSession = crypto.randomBytes(32).toString('hex');
-        await session.save();
-      }
-
-      if(session.oauthApps.indexOf(app._id) === -1){
-        session.oauthApps.push(app._id);
-        await session.save();
-      }
-
-      if(user.allowedApps.indexOf(app._id) == -1){
-        user.allowedApps.push(app._id);
-        await user.save();
-      }
-
-      reply.send({ ok: true, url: app.redirectUri + '?token=' + session.oauthSession });
+      reply.send({ ok: true, url: app.redirectUri + '?token=' + session.token });
     }
   )
 

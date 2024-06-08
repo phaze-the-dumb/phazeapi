@@ -41,68 +41,55 @@ export let cleanSessionsForUser = async ( userID: string ): Promise<any[]> => {
   return sessionsList.filter(x => newSessionList.indexOf(x._id!) !== -1);
 }
 
-export let findUserFromToken = async ( 
+export let findUserFromToken = async (
   req: FastifyRequest<{ Querystring: { token?: string, state?: string, apptoken?: string } }>,
   reply: FastifyReply, 
-  opts?: { dontRequireMfa?: boolean, dontRequireEmail?: boolean, dontRequireEmailVerification?: boolean, allowOAuth?: boolean }
-): Promise<{ session: any, user: any, oauth: boolean }> => {
+  opts?: { dontRequireMfa?: boolean, dontRequireEmail?: boolean, dontRequireEmailVerification?: boolean }
+): Promise<{ session: any, user: any }> => {
   if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
 
   let token = req.query.token || req.query.state;
 
   if(!token){
     reply.code(400).send({ ok: false, error: 'Invalid Query String' });
-    return { session: null, user: null, oauth: false };
+    return { session: null, user: null };
   }
 
-  let oauth = false;
   let session = await sessions.findOne({ token: token });
   if(!session){
-    if(opts?.allowOAuth && req.query.apptoken){
-      session = await sessions.findOne({ oauthSession: token });
-      oauth = true;
-
-      let app = await apps.findOne({ token: req.query.apptoken });
-      if(!app){
-        reply.code(401).send({ ok: false, error: 'Invalid App' });
-        return { session: null, user: null, oauth };
-      }
-
-      if(!session){
-        reply.code(401).send({ ok: false, error: 'Invalid Token' });
-        return { session: null, user: null, oauth };
-      }
-
-      if(session.oauthApps.indexOf(app._id!) === -1){
-        reply.code(401).send({ ok: false, error: 'Invalid Token' });
-        return { session: null, user: null, oauth };
-      }
-    } else{
-      reply.code(401).send({ ok: false, error: 'Invalid Token' });
-      return { session: null, user: null, oauth };
-    }
+    reply.code(401).send({ ok: false, error: 'Invalid Token' });
+    return { session: null, user: null };
   }
 
-  if(!oauth && await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
+  let isApp = false;
+
+  if(req.query.apptoken){
+    let app = await apps.findOne({ token: req.query.apptoken });
+
+    if(app)
+      isApp = true;
+  }
+
+  if(!isApp && await getIpInfo(req.headers['cf-connecting-ip'].toString()) !== session.loc!.region + ' ' + session.loc!.city){
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
-  
+
   let user = await users.findById(session.userID);
   if(!user){
     await sessions.deleteOne({ _id: session._id });
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
 
   if(!user.emailVerified && !opts?.dontRequireEmailVerification){
     reply.code(403).send({ ok: false, error: 'Verify Email' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
 
   if(user.hasMfa && !session.hasMfa && !opts?.dontRequireMfa){
     reply.code(403).send({ ok: false, error: 'MFA Auth Needed' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
 
   if(!session.expiresOn || session.expiresOn.getTime() < Date.now()){
@@ -111,13 +98,13 @@ export let findUserFromToken = async (
 
     await sessions.deleteOne({ _id: session._id });
     reply.code(401).send({ ok: false, error: 'Invalid Session' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
 
   if(!session.valid && !opts?.dontRequireEmail){
     reply.code(403).send({ ok: false, error: 'Session requires verification' });
-    return { session: null, user: null, oauth };
+    return { session: null, user: null };
   }
 
-  return { session, user, oauth }
+  return { session, user }
 }
