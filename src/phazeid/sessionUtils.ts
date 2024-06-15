@@ -1,7 +1,9 @@
 import users from "./db/users"
 import sessions from "./db/sessions";
-import { FastifyReply, FastifyRequest } from "fastify";
 import apps from "./db/app";
+
+import { FastifyReply, FastifyRequest } from "fastify";
+import * as argon2 from "argon2";
 
 let ipLocCache: any = {};
 
@@ -48,15 +50,25 @@ export let findUserFromToken = async (
 ): Promise<{ session: any, user: any }> => {
   if(!req.headers['cf-connecting-ip'])return reply.code(400).send({ ok: false, error: 'Invalid Request' });
 
-  let token = req.query.token || req.query.state;
+  let tokenQuery = req.query.token || req.query.state;
 
-  if(!token){
+  if(!tokenQuery){
     reply.code(400).send({ ok: false, error: 'Invalid Query String' });
     return { session: null, user: null };
   }
 
-  let session = await sessions.findOne({ token: token });
+  let tokenSplit = tokenQuery.split('|');
+
+  let token = tokenSplit[0];
+  let tokenId = tokenSplit[1];
+
+  let session = await sessions.findById(tokenId);
   if(!session){
+    reply.code(401).send({ ok: false, error: 'Invalid Token' });
+    return { session: null, user: null };
+  }
+
+  if(!await argon2.verify(session.token!, token, { type: argon2.argon2id })){
     reply.code(401).send({ ok: false, error: 'Invalid Token' });
     return { session: null, user: null };
   }

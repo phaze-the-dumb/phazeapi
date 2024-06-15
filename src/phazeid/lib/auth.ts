@@ -62,9 +62,12 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
 
       let userID = crypto.randomUUID();
 
+      let token = crypto.randomBytes(32).toString('hex');
+      let id = crypto.randomUUID();
+
       let session = {
-        _id: crypto.randomUUID(),
-        token: crypto.randomBytes(32).toString('hex'),
+        _id: id,
+        token: await argon2.hash(token, { hashLength: 50, type: argon2.argon2id }),
         createdOn: new Date(),
         expiresOn: new Date(Date.now() + 604800000),
         loc: ipInfo,
@@ -128,7 +131,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
       await users.create(userData);
       await sessions.create(session);
 
-      reply.send({ ok: true, session: session.token })
+      reply.send({ ok: true, session: token + '|' + id })
     }
   )
 
@@ -209,11 +212,14 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         if(user.hasMfa)
           sessionValid = true;
 
+        let token = crypto.randomBytes(32).toString('hex');
+        let id = crypto.randomUUID();
+
         let session = await sessions.create({
-          _id: crypto.randomUUID(),
-          token: crypto.randomBytes(32).toString('hex'),
+          _id: id,
+          token: await argon2.hash(token, { hashLength: 50, type: argon2.argon2id }),
           createdOn: new Date(),
-          expiresOn: new Date(Date.now() + 259200000),
+          expiresOn: new Date(Date.now() + 604800000),
           loc: ipInfo,
           valid: sessionValid ? true : false,
           challengeCode: sessionValid ? '' : Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0'),
@@ -248,7 +254,7 @@ export let main = async ( fastify: FastifyInstance, transport: Transporter ) => 
         user.loginAttempts = 0;
         await user.save();
 
-        reply.send({ ok: true, session: session.token, requiresMfa: user.hasMfa, valid: session.valid })
+        reply.send({ ok: true, session: token + '|' + id, requiresMfa: user.hasMfa, valid: session.valid })
 
         if(session.valid && !user.hasMfa){
           transport.sendMail({
