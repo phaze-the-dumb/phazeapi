@@ -51,7 +51,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       if(!app)
         return reply.code(400).send({ ok: false, error: 'Bad Request' });
 
-      reply.send({ ok: true, url: app.redirectUri + '?token=' + session.token });
+      reply.send({ ok: true, url: app.redirectUri });
     }
   )
 
