@@ -118,5 +118,8 @@ export let findUserFromToken = async (
     return { session: null, user: null };
   }
 
+  session.expiresOn = new Date(Date.now() + 604800000);
+  await session.save();
+
   return { session, user }
 }
