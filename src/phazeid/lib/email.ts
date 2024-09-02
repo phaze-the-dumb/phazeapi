@@ -53,7 +53,7 @@ export let main = async ( fastify: FastifyInstance ) => {
       let token = tokenSplit[0];
       let tokenId = tokenSplit[1];
 
-      let session = await sessions.findOne({ id: tokenId });
+      let session = await sessions.findById(tokenId);
       if(!session)return reply.code(401).send({ ok: false, error: 'Invalid Token' });
 
       if(!await argon2.verify(session.token!, token, { type: argon2.argon2id })){
