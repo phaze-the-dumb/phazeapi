@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { findUserFromToken } from "../sessionUtils";
 
-const PHAZE_TEIRS: string[] = [ '23051636' ];
+const PHAZE_TEIRS: string[] = [ '23051636', '23052574' ];
 
 export let main = async ( fastify: FastifyInstance ) => {
   fastify.get<{ Querystring: { token: string } }>('/id/v1/patreon', { schema: { tags: [ 'Internal' ] } }, async ( req, reply ) => {
